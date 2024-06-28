@@ -60,7 +60,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
                 "- questionText: The text of the quiz question." +
                 "- options: An array of four possible answers." +
                 "- correctOption: The correct answer from the options array." +
-                "- difficulty: The difficulty level of the question (easy, medium, hard)." +
+                "- difficulty: The difficulty level of the question (3-easy, 3-medium, 3-hard, 1-your choice)." +
                 "- timeLimit: The time limit in seconds for answering the question." +
                 "Please provide the JSON output with the specified structure.";
 

@@ -2,7 +2,7 @@ package com.quizzka.backend.service.impl;
 
 import com.quizzka.backend.entity.QuizQuestion;
 import com.quizzka.backend.entity.UserResponse;
-import com.quizzka.backend.payload.request.helper.QuestionResponse;
+import com.quizzka.backend.payload.request.helper.QuestionResponseOld;
 import com.quizzka.backend.repository.QuizQuestionRepository;
 import com.quizzka.backend.repository.UserResponseRepository;
 import com.quizzka.backend.service.UserResponseService;
@@ -24,7 +24,7 @@ public class UserResponseServiceImpl implements UserResponseService {
     @Autowired
     private LeagueService leagueService;
 
-    public void saveUserResponse(String userId, List<QuestionResponse> responses, LocalDateTime startTime, LocalDateTime endTime) {
+    public void saveUserResponse(String userId, List<QuestionResponseOld> responses, LocalDateTime startTime, LocalDateTime endTime) {
         UserResponse userResponse = new UserResponse();
         userResponse.setUserId(userId);
         userResponse.setResponses(responses);
@@ -48,9 +48,9 @@ public class UserResponseServiceImpl implements UserResponseService {
         leagueService.updateXp(userId, xpEarned);
     }
 
-    private int calculateCorrectAnswers(List<QuestionResponse> responses) {
+    private int calculateCorrectAnswers(List<QuestionResponseOld> responses) {
         int correctAnswers = 0;
-        for (QuestionResponse response : responses) {
+        for (QuestionResponseOld response : responses) {
             QuizQuestion question = quizQuestionRepository.findById(response.getQuestionId()).orElse(null);
             if (question != null && question.getAnswer().equals(response.getAnswer())) {
                 correctAnswers++;

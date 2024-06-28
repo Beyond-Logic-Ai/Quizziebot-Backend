@@ -1,6 +1,6 @@
 package com.quizzka.backend.payload.request;
 
-import com.quizzka.backend.payload.request.helper.QuestionResponse;
+import com.quizzka.backend.payload.request.helper.QuestionResponseOld;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public class SignUpRequest {
     private String lastname;
     private int age;
     private String country;
-    private List<QuestionResponse> quizResponses;
+    private List<QuestionResponseOld> quizResponses;
     private LocalDateTime quizStartTime;
     private LocalDateTime quizEndTime;
 

@@ -1,13 +1,11 @@
 package com.quizzka.backend.service.impl;
 
 import com.quizzka.backend.entity.User;
-import com.quizzka.backend.entity.UserResponse;
 import com.quizzka.backend.jwt.JwtUtil;
 import com.quizzka.backend.payload.request.ForgotPasswordRequest;
 import com.quizzka.backend.payload.request.LoginRequest;
 import com.quizzka.backend.payload.request.ResetPasswordRequest;
 import com.quizzka.backend.payload.request.SignUpRequest;
-import com.quizzka.backend.payload.request.helper.QuestionResponse;
 import com.quizzka.backend.payload.response.JwtResponse;
 import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.repository.UserResponseRepository;
@@ -22,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

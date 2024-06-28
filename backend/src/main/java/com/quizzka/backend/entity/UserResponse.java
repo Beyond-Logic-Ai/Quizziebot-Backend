@@ -1,6 +1,6 @@
 package com.quizzka.backend.entity;
 
-import com.quizzka.backend.payload.request.helper.QuestionResponse;
+import com.quizzka.backend.payload.request.helper.QuestionResponseOld;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class UserResponse {
     @Id
     private String id;
     private String userId;
-    private List<QuestionResponse> responses;
+    private List<QuestionResponseOld> responses;
     private LocalDateTime quizStartTime;
     private LocalDateTime quizEndTime;
     private long timeTaken; // in seconds

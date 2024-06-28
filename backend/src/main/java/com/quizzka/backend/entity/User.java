@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 
 @Builder(toBuilder = true)
@@ -56,6 +57,9 @@ public class User implements UserDetails {
     @Getter @Setter
     private String loginType;
 
+    @Getter @Setter
+    private List<String> answeredQuestionIds;
+
     public String getFullName() {
         return firstname + " " + lastname;
     }
@@ -94,4 +98,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
