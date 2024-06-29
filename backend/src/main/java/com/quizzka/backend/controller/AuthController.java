@@ -15,6 +15,7 @@ import com.quizzka.backend.service.OtpService;
 import com.quizzka.backend.service.UserResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /*
@@ -73,9 +74,8 @@ public class AuthController {
     private UserResponseService userResponseService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@Validated @RequestBody SignUpRequest signUpRequest) {
         SignUpRequest signUpReq = authService.registerUser(signUpRequest);
-        userResponseService.saveUserResponse(signUpReq.getId(), signUpReq.getQuizResponses(), signUpReq.getQuizStartTime(), signUpReq.getQuizEndTime());
         return ResponseEntity.ok(new SignUpResponse("User registered successfully!", signUpReq.getId()));
     }
 

@@ -12,4 +12,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findTop10ByLeagueOrderByTotalXpDesc(String league);
     List<User> findByLeagueOrderByTotalXpDesc(String league);
     Optional<User> findByResetToken(String resetToken);
+    boolean existsByUsername(String username);
+    User findByUsername(String username);
 }

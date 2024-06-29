@@ -1,16 +1,19 @@
 package com.quizzka.backend.service.impl;
 
+import com.quizzka.backend.entity.Question;
+import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.User;
 import com.quizzka.backend.jwt.JwtUtil;
-import com.quizzka.backend.payload.request.ForgotPasswordRequest;
-import com.quizzka.backend.payload.request.LoginRequest;
-import com.quizzka.backend.payload.request.ResetPasswordRequest;
-import com.quizzka.backend.payload.request.SignUpRequest;
+import com.quizzka.backend.payload.request.*;
 import com.quizzka.backend.payload.response.JwtResponse;
+import com.quizzka.backend.payload.response.QuizResponse;
+import com.quizzka.backend.repository.QuizResultRepository;
 import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.repository.UserResponseRepository;
 import com.quizzka.backend.service.AuthService;
 import com.quizzka.backend.service.EmailService;
+import com.quizzka.backend.service.QuestionService;
+import com.quizzka.backend.service.QuizSubmissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,10 +50,19 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private QuizResultRepository quizResultRepository;
+
+    @Autowired
+    private QuizSubmissionService quizSubmissionService;
+
     @Override
     public SignUpRequest registerUser(SignUpRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new RuntimeException("Email is already in use!");
+        }
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            throw new RuntimeException("Username is already in use");
         }
 
         User user = User.builder()
@@ -58,16 +71,22 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(signUpRequest.getPhoneNumber())
                 .firstname(signUpRequest.getFirstname())
                 .lastname(signUpRequest.getLastname())
-                .league("bronze")
-                .totalXp(0)
+                .username(signUpRequest.getUsername())
+                .gender(signUpRequest.getGender())
+                .dob(signUpRequest.getDob())
+                .accountType(signUpRequest.getAccountType())
+                .age(signUpRequest.getAge())
+                .country(signUpRequest.getCountry())
+                .loginType(signUpRequest.getLoginType())
                 .build();
 
         userRepository.save(user);
-        signUpRequest.setId(user.getId());
-
+//        signUpRequest.setId(user.getId());
+        QuizSubmission quizSubmission = signUpRequest.getQuizSubmission();
+        quizSubmission.setUserId(user.getId());
+        quizSubmissionService.evaluateQuiz(quizSubmission);
         return signUpRequest;
     }
-
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest) {

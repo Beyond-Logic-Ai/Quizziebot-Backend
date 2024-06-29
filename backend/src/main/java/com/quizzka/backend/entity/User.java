@@ -1,7 +1,13 @@
 package com.quizzka.backend.entity;
 
+import com.quizzka.backend.payload.response.QuizResponse;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,29 +28,51 @@ public class User implements UserDetails {
     @Getter @Setter
     private String id;
 
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is mandatory")
+    @Indexed(unique = true)
     @Getter @Setter
     private String email;
 
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$",
+            message = "Password must be at least 8 characters long, contain at least one digit, one lower case letter, one upper case letter, and one special character"
+    )
+    @NotBlank(message = "Password is mandatory")
     private String password;
 
     @Getter @Setter
     private String phoneNumber;
 
+    @NotBlank(message = "First name is mandatory")
     @Getter @Setter
     private String firstname;
 
+    @NotBlank(message = "Last name is mandatory")
     @Getter @Setter
     private String lastname;
 
-    @Getter @Setter
-    private String league;
+    @NotBlank(message = "Username is mandatory")
+    @Indexed(unique = true)
+    @Setter
+    private String username;
 
+    @NotBlank(message = "Gender is mandatory")
     @Getter @Setter
-    private int totalXp;
+    private String gender;
+
+    @NotNull(message = "Date of birth is mandatory")
+    @Getter @Setter
+    private LocalDateTime dob;
+
+    @NotBlank(message = "Account type is mandatory")
+    @Getter @Setter
+    private String accountType;
 
     @Getter @Setter
     private int age;
 
+    @NotBlank(message = "Country is mandatory")
     @Getter @Setter
     private String country;
 
@@ -57,8 +85,11 @@ public class User implements UserDetails {
     @Getter @Setter
     private String loginType;
 
-//    @Getter @Setter
-//    private List<String> answeredQuestionIds;
+    @Getter @Setter
+    private String league;
+
+    @Getter @Setter
+    private int totalXp;
 
     public String getFullName() {
         return firstname + " " + lastname;
@@ -76,7 +107,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username; // Changed to return username instead of email
     }
 
     @Override
@@ -98,5 +129,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }
