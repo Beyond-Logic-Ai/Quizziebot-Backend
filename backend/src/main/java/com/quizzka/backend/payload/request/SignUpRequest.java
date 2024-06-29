@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SignUpRequest {
     private String id;
+
     private String email;
     @Getter
     private String password;
@@ -23,5 +24,5 @@ public class SignUpRequest {
     private List<QuestionResponseOld> quizResponses;
     private LocalDateTime quizStartTime;
     private LocalDateTime quizEndTime;
-
+    private String loginType;
 }

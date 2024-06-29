@@ -57,8 +57,8 @@ public class User implements UserDetails {
     @Getter @Setter
     private String loginType;
 
-    @Getter @Setter
-    private List<String> answeredQuestionIds;
+//    @Getter @Setter
+//    private List<String> answeredQuestionIds;
 
     public String getFullName() {
         return firstname + " " + lastname;

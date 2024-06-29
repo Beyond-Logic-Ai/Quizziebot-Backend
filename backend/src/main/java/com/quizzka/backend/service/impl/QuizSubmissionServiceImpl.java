@@ -31,8 +31,8 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
             Question question = questionService.findQuestionById(answer.getQuestionId());
             if (question != null && question.getCorrectOption().equals(answer.getSelectedOption())) {
                 correctAnswers++;
-                score += 10; // example scoring logic
-                xpGained += 10; // example XP logic
+                score += 10;
+                xpGained += 10;
             } else {
                 wrongAnswers++;
             }
