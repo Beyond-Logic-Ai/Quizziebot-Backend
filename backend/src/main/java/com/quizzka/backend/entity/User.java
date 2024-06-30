@@ -89,7 +89,10 @@ public class User implements UserDetails {
     private String league;
 
     @Getter @Setter
-    private int totalXp;
+    private int xp;
+
+    @Getter @Setter
+    private int score;
 
     public String getFullName() {
         return firstname + " " + lastname;
