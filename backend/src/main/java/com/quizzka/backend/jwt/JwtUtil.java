@@ -1,5 +1,7 @@
 package com.quizzka.backend.jwt;
 
+import com.quizzka.backend.entity.User;
+import com.quizzka.backend.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,55 +10,69 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}") // Load secret from application properties
+    @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    @Value("${jwt.expirationMs}") // Load expiration time from properties
+    @Value("${jwt.expirationMs}")
     private int jwtExpirationMs;
 
-    public String generateToken(String mobileNumber) {
-        Instant now = Instant.now();
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", userDetails.getUsername());
+
+        if (userDetails instanceof CustomUserDetails) {
+            claims.put("email", ((CustomUserDetails) userDetails).getEmail());
+        }
+
         return Jwts.builder()
-                .setSubject(mobileNumber)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plusMillis(jwtExpirationMs)))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
                 .compact();
     }
 
     public Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()
-                    .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                    .setSigningKey(SECRET_KEY.getBytes())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException |
                  SignatureException | IllegalArgumentException e) {
-            // Log or handle the exception (e.g., throw a custom exception)
             throw new RuntimeException("Invalid JWT token: " + e.getMessage(), e);
         }
     }
 
-    public String extractMobileNumber(String token) {
+    public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    public String extractEmail(String token) {
+        return extractAllClaims(token).get("email", String.class);
+    }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String mobileNumber = extractMobileNumber(token);
-        return (mobileNumber.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            Claims claims = extractAllClaims(token);
+            String username = claims.getSubject();
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(claims);
+        } catch (JwtException e) {
+            // Token is invalid
+            return false;
+        }
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractAllClaims(token).getExpiration();
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
     }
 }

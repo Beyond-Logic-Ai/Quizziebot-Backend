@@ -85,6 +85,29 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    public Map<String, Object> getQuestionsByCategoryAndDifficulty(String category, String difficulty) {
+        // Fetch questions from the repository
+        List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
+        List<Question> allQuestions = collections.stream()
+                .flatMap(collection -> collection.getQuestions().stream())
+                .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
+                .collect(Collectors.toList());
+
+        // Shuffle and limit to 10 questions
+        Collections.shuffle(allQuestions);
+        List<Question> selectedQuestions = allQuestions.stream().limit(10).collect(Collectors.toList());
+
+        // Generate a unique quizId
+        String quizId = UUID.randomUUID().toString();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("quizId", quizId);
+        response.put("questions", selectedQuestions);
+
+        return response;
+    }
+
+    @Override
     public Question findQuestionById(String questionId) {
         List<QuestionCollection> collections = questionCollectionRepository.findAll();
         for (QuestionCollection collection : collections) {

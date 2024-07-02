@@ -18,7 +18,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +59,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private QuizSubmissionService quizSubmissionService;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Override
     public SignUpRequest registerUser(SignUpRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -81,26 +87,30 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-//        signUpRequest.setId(user.getId());
+        signUpRequest.setId(user.getId());
         QuizSubmission quizSubmission = signUpRequest.getQuizSubmission();
         quizSubmission.setUserId(user.getId());
-        quizSubmissionService.evaluateQuiz(quizSubmission);
+        quizSubmission.setInitialQuiz(true);
+        QuizResult quizResult = quizSubmissionService.evaluateQuiz(quizSubmission);
+        signUpRequest.setId(user.getId());
+
         return signUpRequest;
     }
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getIdentifier(), loginRequest.getPassword())
         );
 
-        UserDetails userDetails = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getIdentifier());
+        String jwt = jwtUtil.generateToken(userDetails);
 
         return new JwtResponse(jwt);
     }
+
 
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
