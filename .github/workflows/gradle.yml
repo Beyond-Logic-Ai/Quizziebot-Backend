@@ -38,8 +38,19 @@ jobs:
       run: |
            cd backend
            mvn -ntp clean package -DskipTests
-           cp -r target/ ../artifacts/
+           cp  target/*.jar ../artifacts/
     - uses: actions/upload-artifact@v4
       with:
             name: final-build
             path: artifacts/
+
+    - name: Deploying Application
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.QUIZZIE_HOST }}
+        username: ${{ secrets.QUIZZIE_USERNAME }}
+        key: ${{ secrets.QUIZZIE_KEY }}
+        port: ${{ secrets.QUIZZIE_PORT }}
+        script: |
+          bash ~/apps/script.sh
+  
