@@ -38,7 +38,7 @@ jobs:
       run: |
            cd backend
            mvn -ntp clean package -DskipTests
-           mv target/backend-0.0.1-SNAPSHOT.jar artifacts/backend-0.0.1-SNAPSHOT.jar
+           cp target/* artifacts/
     - uses: actions/upload-artifact@v4
       with:
             name: final-build
