@@ -41,7 +41,7 @@ jobs:
            cp  target/*.jar ../artifacts/
     - uses: actions/upload-artifact@v4
       with:
-            name: final-build
+            name: jar_file
             path: artifacts/
 
     - name: Deploying Application
