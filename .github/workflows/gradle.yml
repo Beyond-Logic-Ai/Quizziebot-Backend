@@ -6,12 +6,12 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
 name: Build pkg
-
+ 
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "test" ]
+    branches: [ "dev" ]
 
 # This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
@@ -38,8 +38,31 @@ jobs:
       run: |
            cd backend
            mvn -ntp clean package -DskipTests
-           cp -r target/ ../artifacts/
+           cp  target/*.jar ../artifacts/
     - uses: actions/upload-artifact@v4
       with:
-            name: final-build
+            name: jar_file
             path: artifacts/
+
+    # - name: Deploying Application
+    #   uses: appleboy/ssh-action@v1.0.3
+    #   with:
+    #     host: ${{ secrets.QUIZZIE_HOST }}
+    #     username: ${{ secrets.QUIZZIE_USERNAME }}
+    #     key: ${{ secrets.QUIZZIE_KEY }}
+    #     port: ${{ secrets.QUIZZIE_PORT }}
+    #     script: |
+    #       bash ~/apps/script.sh
+  # Runs a set of commands using the runners shell
+      
+    - name: Upload repo to remote server
+      env:
+           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+         ssh-add - <<< "${{ secrets.QUIZZIE_KEY }}"
+         echo current path 
+         pwd
+         ls
+         scp -o StrictHostKeyChecking=no -r -P ${{ secrets.QUIZZIE_PORT }} artifacts ${{ secrets.QUIZZIE_USERNAME }}@${{secrets.QUIZZIE_HOST}}:/home/admin/
+
