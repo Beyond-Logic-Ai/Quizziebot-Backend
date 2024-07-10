@@ -30,7 +30,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:8081", "https://api.quizziebot.com/"));
+                    config.setAllowedOrigins(List.of("https://api.quizziebot.com/", "http://localhost:8081"));
                     config.setAllowedMethods(List.of("*"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);

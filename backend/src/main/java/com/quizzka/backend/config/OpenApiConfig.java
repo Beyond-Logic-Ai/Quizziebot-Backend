@@ -23,8 +23,8 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .servers(List.of(
-                        new Server().url("http://localhost:8081").description("Local server"),
-                        new Server().url("https://api.quizziebot.com").description("Deployed server")
+                        new Server().url("https://api.quizziebot.com").description("Deployed server"),
+                        new Server().url("http://localhost:8081").description("Local server")
                 ));
     }
 }
