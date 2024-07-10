@@ -1,18 +1,14 @@
 package com.quizzka.backend.service.impl;
 
-import com.quizzka.backend.entity.Question;
 import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.User;
 import com.quizzka.backend.jwt.JwtUtil;
 import com.quizzka.backend.payload.request.*;
 import com.quizzka.backend.payload.response.JwtResponse;
-import com.quizzka.backend.payload.response.QuizResponse;
 import com.quizzka.backend.repository.QuizResultRepository;
 import com.quizzka.backend.repository.UserRepository;
-import com.quizzka.backend.repository.UserResponseRepository;
 import com.quizzka.backend.service.AuthService;
 import com.quizzka.backend.service.EmailService;
-import com.quizzka.backend.service.QuestionService;
 import com.quizzka.backend.service.QuizSubmissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,9 +38,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private JwtUtil jwtUtil;
-
-    @Autowired
-    private UserResponseRepository userResponseRepository;
 
     @Autowired
     private ModelMapper modelMapper;
