@@ -1,4 +1,4 @@
-package com.quizzka.backend.payload.request.helper;
+package com.quizzka.backend.entity.helper;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class  Answer {
+public class QuestionStatus {
     private String questionId;
-    private String selectedOption;
-    private int timeTaken;
     private boolean isAnswered;
 }

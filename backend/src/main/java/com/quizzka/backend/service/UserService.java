@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface UserService {
     User findUserById(String userId);
-    List<User> getUsersByLeague(String league);
 }

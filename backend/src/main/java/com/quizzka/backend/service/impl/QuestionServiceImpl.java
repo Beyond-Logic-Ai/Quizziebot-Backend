@@ -3,6 +3,7 @@ package com.quizzka.backend.service.impl;
 import com.quizzka.backend.entity.Question;
 import com.quizzka.backend.entity.QuestionCollection;
 import com.quizzka.backend.entity.QuizSession;
+import com.quizzka.backend.entity.helper.QuestionStatus;
 import com.quizzka.backend.repository.QuestionCollectionRepository;
 import com.quizzka.backend.repository.QuestionRepository;
 import com.quizzka.backend.repository.QuizSessionRepository;
@@ -39,11 +40,17 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Map<String, Object> getQuestionsByCategoryAndDifficulty(String userId, String category, String difficulty) {
-        Optional<QuizSession> optionalQuizSession = quizSessionRepository.findByUserId(userId);
-        List<String> answeredQuestionIds = optionalQuizSession
-                .map(QuizSession::getQuestionIds)
-                .orElse(new ArrayList<>());
+        // Fetch all quiz sessions for the user
+        List<QuizSession> quizSessions = quizSessionRepository.findByUserId(userId);
 
+        // Extract answered question IDs from all sessions
+        List<String> answeredQuestionIds = quizSessions.stream()
+                .flatMap(session -> session.getQuestionStatuses().stream())
+                .filter(QuestionStatus::isAnswered) // Filter for answered questions
+                .map(QuestionStatus::getQuestionId) // Extract question IDs
+                .toList();
+
+        // Fetch questions from the db
         List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
         List<Question> allQuestions = collections.stream()
                 .flatMap(collection -> collection.getQuestions().stream())
@@ -59,11 +66,39 @@ public class QuestionServiceImpl implements QuestionService {
         String quizId = UUID.randomUUID().toString();
 
         // Save the session with the newly selected question IDs
+        List<QuestionStatus> questionStatuses = selectedQuestions.stream()
+                .map(question -> new QuestionStatus(question.getQuestionId(), false)) // Mark new questions as unanswered
+                .toList();
+
+        // Save the session with the newly selected question IDs
         QuizSession quizSession = new QuizSession();
         quizSession.setQuizId(quizId);
         quizSession.setUserId(userId);
-        quizSession.setQuestionIds(selectedQuestions.stream().map(Question::getQuestionId).collect(Collectors.toList()));
+        quizSession.setQuestionStatuses(questionStatuses);
         quizSessionRepository.save(quizSession);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("quizId", quizId);
+        response.put("questions", selectedQuestions);
+
+        return response;
+    }
+
+    @Override
+    public Map<String, Object> getQuestionsByCategoryAndDifficulty(String category, String difficulty) {
+        // Fetch questions from the repository
+        List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
+        List<Question> allQuestions = collections.stream()
+                .flatMap(collection -> collection.getQuestions().stream())
+                .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
+                .collect(Collectors.toList());
+
+        // Shuffle and limit to 10 questions
+        Collections.shuffle(allQuestions);
+        List<Question> selectedQuestions = allQuestions.stream().limit(10).collect(Collectors.toList());
+
+        // Generate a unique quizId
+        String quizId = UUID.randomUUID().toString();
 
         Map<String, Object> response = new HashMap<>();
         response.put("quizId", quizId);

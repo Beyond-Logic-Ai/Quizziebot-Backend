@@ -1,7 +1,5 @@
 package com.quizzka.backend.controller;
 
-import com.quizzka.backend.entity.User;
-import com.quizzka.backend.jwt.JwtUtil;
 import com.quizzka.backend.payload.request.ForgotPasswordRequest;
 import com.quizzka.backend.payload.request.LoginRequest;
 import com.quizzka.backend.payload.request.ResetPasswordRequest;
@@ -9,12 +7,10 @@ import com.quizzka.backend.payload.request.SignUpRequest;
 import com.quizzka.backend.payload.response.JwtResponse;
 import com.quizzka.backend.payload.response.MessageResponse;
 import com.quizzka.backend.payload.response.SignUpResponse;
-import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.AuthService;
-import com.quizzka.backend.service.OtpService;
-import com.quizzka.backend.service.UserResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /*
@@ -69,13 +65,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private UserResponseService userResponseService;
-
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@Validated @RequestBody SignUpRequest signUpRequest) {
         SignUpRequest signUpReq = authService.registerUser(signUpRequest);
-        userResponseService.saveUserResponse(signUpReq.getId(), signUpReq.getQuizResponses(), signUpReq.getQuizStartTime(), signUpReq.getQuizEndTime());
         return ResponseEntity.ok(new SignUpResponse("User registered successfully!", signUpReq.getId()));
     }
 
