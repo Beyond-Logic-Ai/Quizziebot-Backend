@@ -1,29 +1,27 @@
 package com.quizzka.backend.service.impl;
 
-import com.quizzka.backend.entity.Question;
 import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.User;
 import com.quizzka.backend.jwt.JwtUtil;
 import com.quizzka.backend.payload.request.*;
 import com.quizzka.backend.payload.response.JwtResponse;
-import com.quizzka.backend.payload.response.QuizResponse;
 import com.quizzka.backend.repository.QuizResultRepository;
 import com.quizzka.backend.repository.UserRepository;
-import com.quizzka.backend.repository.UserResponseRepository;
 import com.quizzka.backend.service.AuthService;
 import com.quizzka.backend.service.EmailService;
-import com.quizzka.backend.service.QuestionService;
 import com.quizzka.backend.service.QuizSubmissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,9 +40,6 @@ public class AuthServiceImpl implements AuthService {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserResponseRepository userResponseRepository;
-
-    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -55,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private QuizSubmissionService quizSubmissionService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public SignUpRequest registerUser(SignUpRequest signUpRequest) {
@@ -81,26 +79,30 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-//        signUpRequest.setId(user.getId());
+        signUpRequest.setId(user.getId());
         QuizSubmission quizSubmission = signUpRequest.getQuizSubmission();
         quizSubmission.setUserId(user.getId());
-        quizSubmissionService.evaluateQuiz(quizSubmission);
+        quizSubmission.setInitialQuiz(true);
+        QuizResult quizResult = quizSubmissionService.evaluateQuiz(quizSubmission);
+        signUpRequest.setId(user.getId());
+
         return signUpRequest;
     }
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getIdentifier(), loginRequest.getPassword())
         );
 
-        UserDetails userDetails = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getIdentifier());
+        String jwt = jwtUtil.generateToken(userDetails);
 
         return new JwtResponse(jwt);
     }
+
 
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
