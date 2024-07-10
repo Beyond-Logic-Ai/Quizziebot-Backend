@@ -66,3 +66,5 @@ jobs:
          ls
          scp -o StrictHostKeyChecking=no -r -P ${{ secrets.QUIZZIE_PORT }} artifacts ${{ secrets.QUIZZIE_USERNAME }}@${{secrets.QUIZZIE_HOST}}:/home/admin/
 
+         
+
