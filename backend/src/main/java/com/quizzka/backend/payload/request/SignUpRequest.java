@@ -54,6 +54,7 @@ public class SignUpRequest {
     @NotBlank(message = "Country is mandatory")
     private String country;
 
-    private QuizSubmission quizSubmission;
+    private boolean rememberMe;
+
     private String loginType;
 }

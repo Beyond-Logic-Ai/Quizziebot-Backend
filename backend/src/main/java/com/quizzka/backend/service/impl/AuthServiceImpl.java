@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,14 +77,17 @@ public class AuthServiceImpl implements AuthService {
                 .age(signUpRequest.getAge())
                 .country(signUpRequest.getCountry())
                 .loginType(signUpRequest.getLoginType())
+                .rememberMe(signUpRequest.isRememberMe())
+                .createdAt(new Date())
+                .updatedAt(new Date())
                 .build();
 
         userRepository.save(user);
         signUpRequest.setId(user.getId());
-        QuizSubmission quizSubmission = signUpRequest.getQuizSubmission();
-        quizSubmission.setUserId(user.getId());
-        quizSubmission.setInitialQuiz(true);
-        QuizResult quizResult = quizSubmissionService.evaluateQuiz(quizSubmission);
+//        QuizSubmission quizSubmission = signUpRequest.getQuizSubmission();
+//        quizSubmission.setUserId(user.getId());
+//        quizSubmission.setInitialQuiz(true);
+//        QuizResult quizResult = quizSubmissionService.evaluateQuiz(quizSubmission);
         signUpRequest.setId(user.getId());
 
         return signUpRequest;

@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 
@@ -93,6 +94,15 @@ public class User implements UserDetails {
 
     @Getter @Setter
     private int score;
+
+    @Getter @Setter
+    private boolean rememberMe;
+
+    @Getter @Setter
+    private Date createdAt;
+
+    @Getter @Setter
+    private Date updatedAt;
 
     public String getFullName() {
         return firstname + " " + lastname;
