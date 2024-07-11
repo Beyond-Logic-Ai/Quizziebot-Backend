@@ -39,10 +39,11 @@ jobs:
            cd backend
            mvn -ntp clean package -DskipTests
            cp  target/*.jar ../artifacts/
+           cd ..
    
     - name: Building Gemini with Maven
       run: |
-           cd backend
+           cd gemini
            mvn -ntp clean package -DskipTests
            cp  target/*.jar ../artifacts/
     
