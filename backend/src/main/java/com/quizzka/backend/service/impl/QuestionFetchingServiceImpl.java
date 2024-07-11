@@ -30,7 +30,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
     @Autowired
     private RestTemplate restTemplate;
 
-//    @Scheduled(cron = "0 0 * * * ?") // This cron expression runs the job every hour
+    @Scheduled(cron = "0 0 * * * ?") // This cron expression runs the job every hour
     public void fetchQuestionsFromLLM() {
         List<Category> categories = categoryService.getAllCategories();
 
@@ -55,14 +55,14 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
     }
 
     private List<Question> fetchQuestionsFromApi(String category) throws Exception {
-        String prompt = "Generate 10 quiz questions in the category of " + category + ". Each question should be structured in JSON format with the following fields:" +
-                "- questionId: A unique identifier for the question." +
-                "- questionText: The text of the quiz question." +
-                "- options: An array of four possible answers." +
-                "- correctOption: The correct answer from the options array." +
-                "- difficulty: The difficulty level of the question (3-easy, 3-medium, 3-hard, 1-your choice)." +
-                "- timeLimit: The time limit in seconds for answering the question." +
-                "Please provide the JSON output with the specified structure.";
+        String prompt = "Generate 10 quiz questions in the category of " + category + ". Each question should be structured in JSON format with the following fields:\n" +
+                "- questionId: A unique identifier for the question.\n" +
+                "- questionText: The text of the quiz question.\n" +
+                "- options: An array of four possible answers.\n" +
+                "- correctOption: The correct answer from the options array.\n" +
+                "- difficulty: The difficulty level of the question (easy, medium, hard).\n" +
+                "- timeLimit: The time limit for answering each question should be 10 seconds.\n" +
+                "Please provide exactly 3 easy questions, 4 medium questions, and 3 hard questions in the JSON output with the specified structure.";
 
         String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
         String url = "http://localhost:8080/prompt?prompt=" + encodedPrompt + "&geminiKey=AIzaSyBlGN-vrFH1a6dc3Kt6eTrRKjr6JxeBZXI";
