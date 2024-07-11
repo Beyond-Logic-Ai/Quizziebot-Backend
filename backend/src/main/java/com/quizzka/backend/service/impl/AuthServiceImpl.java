@@ -63,6 +63,9 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new RuntimeException("Username is already in use");
         }
+        if (userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber())) {
+            throw new RuntimeException("Phone number is already in use");
+        }
 
         User user = User.builder()
                 .email(signUpRequest.getEmail())
