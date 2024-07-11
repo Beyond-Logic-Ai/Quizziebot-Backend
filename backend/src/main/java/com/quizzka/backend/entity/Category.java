@@ -1,5 +1,6 @@
 package com.quizzka.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,8 @@ public class Category {
     @Id
     private String id;
     private String name;
+    @JsonIgnore
     private Date createdAt;
+    @JsonIgnore
     private Date updatedAt;
 }
