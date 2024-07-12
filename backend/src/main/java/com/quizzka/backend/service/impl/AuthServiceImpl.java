@@ -10,6 +10,7 @@ import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.AuthService;
 import com.quizzka.backend.service.EmailService;
 import com.quizzka.backend.service.QuizSubmissionService;
+import com.quizzka.backend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,6 +55,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public SignUpRequest registerUser(SignUpRequest signUpRequest) {
@@ -105,6 +109,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getIdentifier());
+        userService.updateLastLoginTime(userDetails.getUsername());
         String jwt = jwtUtil.generateToken(userDetails);
 
         return new JwtResponse(jwt);

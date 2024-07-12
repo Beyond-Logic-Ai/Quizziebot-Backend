@@ -1,11 +1,13 @@
 package com.quizzka.backend.service.impl;
 
 import com.quizzka.backend.entity.User;
+import com.quizzka.backend.payload.response.HomeScreenResponse;
 import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -17,6 +19,34 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserById(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public HomeScreenResponse getHomeScreenData(String identifier) {
+        User user = userRepository.findByEmail(identifier)
+                .orElseGet(() -> userRepository.findByPhoneNumber(identifier)
+                        .orElseGet(() -> userRepository.findByUsername(identifier)
+                                .orElseThrow(() -> new RuntimeException("User not found with identifier: " + identifier))));
+
+        HomeScreenResponse response = new HomeScreenResponse();
+        response.setUsername(user.getUsername());
+        response.setProfilePictureUrl(user.getProfilePictureUrl());
+        response.setXp(user.getXp());
+        response.setCoins(user.getCoins());
+        response.setLastLogin(user.getLastLogin());
+
+        return response;
+    }
+
+    @Override
+    public void updateLastLoginTime(String identifier) {
+        User user = userRepository.findByEmail(identifier)
+                .orElseGet(() -> userRepository.findByPhoneNumber(identifier)
+                        .orElseGet(() -> userRepository.findByUsername(identifier)
+                                .orElseThrow(() -> new RuntimeException("User not found with identifier: " + identifier))));
+
+        user.setLastLogin(new Date());
+        userRepository.save(user);
     }
 
 }

@@ -104,6 +104,15 @@ public class User implements UserDetails {
     @Getter @Setter
     private Date updatedAt;
 
+    @Getter @Setter
+    private Date lastLogin;
+
+    @Getter @Setter
+    private String profilePictureUrl;
+
+    @Getter @Setter
+    private int coins;
+
     public String getFullName() {
         return firstname + " " + lastname;
     }

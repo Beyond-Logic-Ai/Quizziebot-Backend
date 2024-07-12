@@ -30,7 +30,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Scheduled(cron = "0 0 * * * ?") // This cron expression runs the job every hour
+    @Scheduled(cron = "0 */5 * * * ?") // This cron expression runs the job every hour
     public void fetchQuestionsFromLLM() {
         List<Category> categories = categoryService.getAllCategories();
 
