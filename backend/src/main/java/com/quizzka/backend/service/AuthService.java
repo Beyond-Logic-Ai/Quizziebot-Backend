@@ -10,6 +10,7 @@ public interface AuthService {
     SignUpRequest registerUser(SignUpRequest signUpRequest);
     JwtResponse authenticateUser(LoginRequest loginRequest);
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest);
+    boolean validateOtp(String email, String otp);
     void resetPassword(ResetPasswordRequest resetPasswordRequest);
-    boolean validateResetToken(String token);
+//    boolean validateResetToken(String token);
 }

@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
@@ -116,6 +117,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
+
+    /*
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         User user = userRepository.findByEmail(forgotPasswordRequest.getEmail())
@@ -160,5 +163,50 @@ public class AuthServiceImpl implements AuthService {
             return !user.getResetTokenExpiry().isBefore(LocalDateTime.now());
         }
         return false;
+    }
+     */
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+        User user = userRepository.findByEmail(forgotPasswordRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + forgotPasswordRequest.getEmail()));
+
+        // Generate OTP
+        SecureRandom random = new SecureRandom();
+        int otp = 100000 + random.nextInt(900000);
+
+        User updatedUser = user.toBuilder()
+                .resetToken(String.valueOf(otp))
+                .resetTokenExpiry(LocalDateTime.now().plusMinutes(15)) // OTP valid for 15 minutes
+                .build();
+
+        userRepository.save(updatedUser);
+
+        emailService.sendEmail(forgotPasswordRequest.getEmail(), "Password Reset OTP", "Your OTP for password reset is: " + otp);
+    }
+
+    @Override
+    public boolean validateOtp(String email, String otp) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        return user.getResetToken().equals(otp) && !user.getResetTokenExpiry().isBefore(LocalDateTime.now());
+    }
+
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        User user = userRepository.findByEmail(resetPasswordRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + resetPasswordRequest.getEmail()));
+
+        if (!user.getResetToken().equals(resetPasswordRequest.getOtp()) || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Invalid or expired OTP");
+        }
+
+        User updatedUser = user.toBuilder()
+                .password(passwordEncoder.encode(resetPasswordRequest.getNewPassword()))
+                .resetToken(null)
+                .resetTokenExpiry(null)
+                .build();
+
+        userRepository.save(updatedUser);
     }
 }
