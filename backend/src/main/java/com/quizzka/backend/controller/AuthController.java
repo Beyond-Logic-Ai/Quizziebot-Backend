@@ -8,7 +8,9 @@ import com.quizzka.backend.payload.response.SignUpResponse;
 import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +42,7 @@ public class AuthController {
         JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
         return ResponseEntity.ok(jwtResponse);
     }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
