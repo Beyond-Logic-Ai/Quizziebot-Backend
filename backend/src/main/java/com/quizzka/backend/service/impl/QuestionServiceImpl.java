@@ -37,7 +37,7 @@ public class QuestionServiceImpl implements QuestionService {
         questionCollection.setUpdatedAt(new Date());
         return questionRepository.save(questionCollection);
     }
-
+/*
     @Override
     public Map<String, Object> getQuestionsByCategoryAndDifficulty(String userId, String category, String difficulty) {
         // Fetch all quiz sessions for the user
@@ -82,6 +82,100 @@ public class QuestionServiceImpl implements QuestionService {
         response.put("questions", selectedQuestions);
 
         return response;
+    }
+*/
+
+    @Override
+    public Map<String, Object> getQuestions(String userId, String mode, String category, String difficulty) {
+        List<Question> selectedQuestions;
+
+        if ("classic".equalsIgnoreCase(mode)) {
+            selectedQuestions = getClassicModeQuestions(userId);
+        } else if ("arcade".equalsIgnoreCase(mode)) {
+            if (category == null || difficulty == null) {
+                throw new IllegalArgumentException("Category and difficulty are required for Arcade mode.");
+            }
+            selectedQuestions = getArcadeModeQuestions(userId, category, difficulty);
+        } else {
+            throw new IllegalArgumentException("Invalid mode specified. Valid modes are 'classic' and 'arcade'.");
+        }
+
+        // Generate a unique quizId
+        String quizId = UUID.randomUUID().toString();
+
+        // Save the session with the newly selected question IDs
+        List<QuestionStatus> questionStatuses = selectedQuestions.stream()
+                .map(question -> new QuestionStatus(question.getQuestionId(), false)) // Mark new questions as unanswered
+                .toList();
+
+        QuizSession quizSession = new QuizSession();
+        quizSession.setQuizId(quizId);
+        quizSession.setUserId(userId);
+        quizSession.setQuestionStatuses(questionStatuses);
+        quizSessionRepository.save(quizSession);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("quizId", quizId);
+        response.put("questions", selectedQuestions);
+
+        return response;
+    }
+
+    private List<Question> getClassicModeQuestions(String userId) {
+        List<String> answeredQuestionIds = getAnsweredQuestionIds(userId);
+
+        List<Question> easyQuestions = fetchQuestionsByDifficulty("easy", answeredQuestionIds);
+        List<Question> mediumQuestions = fetchQuestionsByDifficulty("medium", answeredQuestionIds);
+        List<Question> hardQuestions = fetchQuestionsByDifficulty("hard", answeredQuestionIds);
+
+        // Shuffle and limit to the required number of questions
+        Collections.shuffle(easyQuestions);
+        Collections.shuffle(mediumQuestions);
+        Collections.shuffle(hardQuestions);
+
+        List<Question> selectedQuestions = new ArrayList<>();
+        selectedQuestions.addAll(easyQuestions.stream().limit(3).toList());
+        selectedQuestions.addAll(mediumQuestions.stream().limit(4).toList());
+        selectedQuestions.addAll(hardQuestions.stream().limit(3).toList());
+
+        // Shuffle the final list to mix easy, medium, and hard questions
+        Collections.shuffle(selectedQuestions);
+
+        return selectedQuestions;
+    }
+
+    private List<Question> getArcadeModeQuestions(String userId, String category, String difficulty) {
+        List<String> answeredQuestionIds = getAnsweredQuestionIds(userId);
+
+        List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
+        List<Question> allQuestions = collections.stream()
+                .flatMap(collection -> collection.getQuestions().stream())
+                .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
+                .filter(question -> !answeredQuestionIds.contains(question.getQuestionId()))
+                .collect(Collectors.toList());
+
+        // Shuffle and limit to 10 questions
+        Collections.shuffle(allQuestions);
+        return allQuestions.stream().limit(10).collect(Collectors.toList());
+    }
+
+    private List<String> getAnsweredQuestionIds(String userId) {
+        List<QuizSession> quizSessions = quizSessionRepository.findByUserId(userId);
+
+        return quizSessions.stream()
+                .flatMap(session -> session.getQuestionStatuses().stream())
+                .filter(QuestionStatus::isAnswered)
+                .map(QuestionStatus::getQuestionId)
+                .toList();
+    }
+
+    private List<Question> fetchQuestionsByDifficulty(String difficulty, List<String> answeredQuestionIds) {
+        List<QuestionCollection> collections = questionCollectionRepository.findAll();
+        return collections.stream()
+                .flatMap(collection -> collection.getQuestions().stream())
+                .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
+                .filter(question -> !answeredQuestionIds.contains(question.getQuestionId()))
+                .collect(Collectors.toList());
     }
 
     @Override

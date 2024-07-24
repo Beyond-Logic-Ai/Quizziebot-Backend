@@ -9,7 +9,7 @@ import java.util.Map;
 public interface QuestionService {
     List<QuestionCollection> getQuestionsByCategory(String category);
     QuestionCollection saveQuestions(QuestionCollection questionCollection);
-    Map<String, Object> getQuestionsByCategoryAndDifficulty(String userId, String category, String difficulty);
+    Map<String, Object> getQuestions(String userId, String mode, String category, String difficulty);
     Question findQuestionById(String questionId);
     Map<String, Object> getQuestionsByCategoryAndDifficulty(String category, String difficulty);
 }

@@ -23,8 +23,10 @@ public class QuizController {
 
 
     @GetMapping("/questions")
-    public ResponseEntity<?> getQuestions(@RequestParam String userId, @RequestParam String category, @RequestParam String difficulty) {
-        Map<String, Object> response = questionService.getQuestionsByCategoryAndDifficulty(userId, category, difficulty);
+    public ResponseEntity<?> getQuestions(@RequestParam String userId, @RequestParam String mode,
+                                          @RequestParam(required = false) String category,
+                                          @RequestParam(required = false) String difficulty) {
+        Map<String, Object> response = questionService.getQuestions(userId, mode, category, difficulty);
         return ResponseEntity.ok(response);
     }
 
