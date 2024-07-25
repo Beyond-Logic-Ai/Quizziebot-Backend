@@ -11,6 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 
 public class HomeScreenResponse {
+    private String userId;
     private String username;
     private String profilePictureUrl;
     private int xp;

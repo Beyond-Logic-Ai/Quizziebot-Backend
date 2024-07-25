@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
                                 .orElseThrow(() -> new RuntimeException("User not found with identifier: " + identifier))));
 
         HomeScreenResponse response = new HomeScreenResponse();
+        response.setUserId(user.getId());
         response.setUsername(user.getUsername());
         response.setProfilePictureUrl(user.getProfilePictureUrl());
         response.setXp(user.getXp());
