@@ -162,4 +162,10 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(updatedUser);
     }
+
+    @Override
+    public boolean checkUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
 }

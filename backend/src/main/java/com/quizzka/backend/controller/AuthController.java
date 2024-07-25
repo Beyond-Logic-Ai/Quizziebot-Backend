@@ -16,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -67,6 +69,13 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
     }
 
+    @GetMapping("/check-username")
+    public ResponseEntity<?>checkUsername(@RequestParam String username) {
+        Boolean exists = authService.checkUsername(username);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
 
 
 
