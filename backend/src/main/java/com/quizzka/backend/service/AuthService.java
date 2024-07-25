@@ -14,4 +14,6 @@ public interface AuthService {
     void resetPassword(ResetPasswordRequest resetPasswordRequest);
 //    boolean validateResetToken(String token);
     boolean checkUsername(String username);
+    boolean checkEmail(String email);
+    boolean checkPhoneNumber(String phoneNumber);
 }

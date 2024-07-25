@@ -168,4 +168,12 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByUsername(username);
     }
 
+    public boolean checkEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public boolean checkPhoneNumber(String phoneNumber) {
+        return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
 }
