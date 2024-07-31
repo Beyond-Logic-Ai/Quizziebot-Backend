@@ -78,8 +78,12 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
             }
 
             quizSession.getQuestionStatuses().stream()
-                    .filter(qs -> qs.getQuestionId().equals(answer.getQuestionId()))
-                    .forEach(qs -> qs.setAnswered(true));
+                    .forEach(qs -> {
+                        submission.getAnswers().stream()
+                                .filter(submissionAnswer -> submissionAnswer.getQuestionId().equals(qs.getQuestionId()))
+                                .findFirst()
+                                .ifPresent(submissionAnswer -> qs.setAnswered(submissionAnswer.isAnswered()));
+                    });
         }
 
         logger.info("Saving the quiz session details at " + new Date());
