@@ -4,6 +4,8 @@ import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.payload.request.QuizSubmission;
 import com.quizzka.backend.service.QuestionService;
 import com.quizzka.backend.service.QuizSubmissionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class QuizController {
     @Autowired
     private QuizSubmissionService quizSubmissionService;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @GetMapping("/questions")
     public ResponseEntity<?> getQuestions(@RequestParam String userId, @RequestParam String mode,
@@ -32,6 +35,7 @@ public class QuizController {
 
     @PostMapping("/submit")
     public ResponseEntity<?> submitQuiz(@RequestBody QuizSubmission submission) {
+        logger.info("Inside /submit");
         QuizResult result = quizSubmissionService.evaluateQuiz(submission);
         return ResponseEntity.ok(result);
     }

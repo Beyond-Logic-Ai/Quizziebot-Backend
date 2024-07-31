@@ -1,5 +1,6 @@
 package com.quizzka.backend.service.impl;
 
+import com.quizzka.backend.controller.AuthController;
 import com.quizzka.backend.entity.Question;
 import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.QuizSession;
@@ -13,6 +14,8 @@ import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.LeaderboardService;
 import com.quizzka.backend.service.QuestionService;
 import com.quizzka.backend.service.QuizSubmissionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,8 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
     @Autowired
     private UserRepository userRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private LeaderboardService leaderboardService;
 
@@ -46,6 +51,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         int xpGained = 0;
         int iqScore = 0;
 
+        logger.info("Finding Existing quizSession");
         // Try to find an existing quiz session or create a new one
         QuizSession quizSession = quizSessionRepository.findByQuizId(submission.getQuizId())
                 .orElseGet(() -> {
@@ -76,7 +82,11 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
                     .forEach(qs -> qs.setAnswered(true));
         }
 
+        logger.info("Saving the quiz session details at " + new Date());
         // Save the updated quiz session
+        quizSession.setUpdatedAt(new Date());
+        quizSession.getQuestionStatuses()
+                        .forEach(e -> logger.info("status of current question: " + e));
         quizSessionRepository.save(quizSession);
 
         int totalQuestions = submission.getAnswers().size();
