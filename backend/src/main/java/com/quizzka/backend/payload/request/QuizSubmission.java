@@ -15,5 +15,4 @@ public class QuizSubmission {
     private String userId;
     private String quizId;
     private List<Answer> answers;
-    private boolean isInitialQuiz;
 }

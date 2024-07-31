@@ -112,6 +112,7 @@ public class QuestionServiceImpl implements QuestionService {
         quizSession.setQuizId(quizId);
         quizSession.setUserId(userId);
         quizSession.setQuestionStatuses(questionStatuses);
+        quizSession.setCreatedAt(new Date());
         quizSessionRepository.save(quizSession);
 
         Map<String, Object> response = new HashMap<>();

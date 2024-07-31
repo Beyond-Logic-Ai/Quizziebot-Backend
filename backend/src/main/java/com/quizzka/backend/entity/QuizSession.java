@@ -21,6 +21,6 @@ public class QuizSession {
     private String quizId;
     private String userId;
     private List<QuestionStatus> questionStatuses;
-//    private Date createdAt;
-//    private Date updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 }

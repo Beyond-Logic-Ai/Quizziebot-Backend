@@ -113,6 +113,8 @@ public class AuthServiceImpl implements AuthService {
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getIdentifier());
             String jwt = jwtUtil.generateToken(userDetails);
 
+            userService.updateLastLoginTime(userDetails.getUsername());
+
             return new JwtResponse(jwt);
         } catch (BadCredentialsException ex) {
             throw new BadCredentialsException("Incorrect username or password");

@@ -16,6 +16,7 @@ import com.quizzka.backend.service.QuizSubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,26 +46,20 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         int xpGained = 0;
         int iqScore = 0;
 
-        Optional<QuizSession> optionalQuizSession = quizSessionRepository.findByQuizId(submission.getQuizId());
-        if (!optionalQuizSession.isPresent()) {
-            if (submission.isInitialQuiz()) {
-                // Create a new quiz session if it's an initial quiz
-                QuizSession newQuizSession = new QuizSession();
-                newQuizSession.setQuizId(submission.getQuizId());
-                newQuizSession.setUserId(submission.getUserId());
-                newQuizSession.setQuestionStatuses(
-                        submission.getAnswers().stream()
-                                .map(answer -> new QuestionStatus(answer.getQuestionId(), false))
-                                .collect(Collectors.toList())
-                );
-                quizSessionRepository.save(newQuizSession);
-                optionalQuizSession = Optional.of(newQuizSession);
-            } else {
-                throw new RuntimeException("Quiz session not found");
-            }
-        }
-
-        QuizSession quizSession = optionalQuizSession.get();
+        // Try to find an existing quiz session or create a new one
+        QuizSession quizSession = quizSessionRepository.findByQuizId(submission.getQuizId())
+                .orElseGet(() -> {
+                    QuizSession newQuizSession = new QuizSession();
+                    newQuizSession.setQuizId(submission.getQuizId());
+                    newQuizSession.setUserId(submission.getUserId());
+                    newQuizSession.setUpdatedAt(new Date());
+                    newQuizSession.setQuestionStatuses(
+                            submission.getAnswers().stream()
+                                    .map(answer -> new QuestionStatus(answer.getQuestionId(), false))
+                                    .collect(Collectors.toList())
+                    );
+                    return quizSessionRepository.save(newQuizSession);
+                });
 
         for (Answer answer : submission.getAnswers()) {
             Question question = questionService.findQuestionById(answer.getQuestionId());
@@ -81,6 +76,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
                     .forEach(qs -> qs.setAnswered(true));
         }
 
+        // Save the updated quiz session
         quizSessionRepository.save(quizSession);
 
         int totalQuestions = submission.getAnswers().size();
@@ -96,6 +92,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         result.setXpGained(xpGained);
         result.setIqScore(iqScore);
 
+        // Save the quiz result
         quizResultRepository.save(result);
 
         // Update user XP and score
