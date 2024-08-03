@@ -49,16 +49,15 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         int wrongAnswers = 0;
         int score = 0;
         int xpGained = 0;
+        int coinsGained = 0;
         int iqScore = 0;
 
-        logger.info("Finding Existing quizSession");
         // Try to find an existing quiz session or create a new one
         QuizSession quizSession = quizSessionRepository.findByQuizId(submission.getQuizId())
                 .orElseGet(() -> {
                     QuizSession newQuizSession = new QuizSession();
                     newQuizSession.setQuizId(submission.getQuizId());
                     newQuizSession.setUserId(submission.getUserId());
-                    newQuizSession.setUpdatedAt(new Date());
                     newQuizSession.setQuestionStatuses(
                             submission.getAnswers().stream()
                                     .map(answer -> new QuestionStatus(answer.getQuestionId(), false))
@@ -71,26 +70,20 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
             Question question = questionService.findQuestionById(answer.getQuestionId());
             if (question != null && question.getCorrectOption().equals(answer.getSelectedOption())) {
                 correctAnswers++;
-                score += 10;
-                xpGained += 10;
+                score += 10; // Score for correct answer
+                xpGained += 15; // XP for correct answer (10 for correctness, 5 for attempt)
+                coinsGained += 10; // Coins for correct answer
             } else {
                 wrongAnswers++;
+                xpGained += 5; // XP for attempting the question
+                coinsGained += 5; // Coins for wrong answer
             }
 
             quizSession.getQuestionStatuses().stream()
-                    .forEach(qs -> {
-                        submission.getAnswers().stream()
-                                .filter(submissionAnswer -> submissionAnswer.getQuestionId().equals(qs.getQuestionId()))
-                                .findFirst()
-                                .ifPresent(submissionAnswer -> qs.setAnswered(submissionAnswer.isAnswered()));
-                    });
+                    .filter(qs -> qs.getQuestionId().equals(answer.getQuestionId()))
+                    .forEach(qs -> qs.setAnswered(true));
         }
 
-        logger.info("Saving the quiz session details at " + new Date());
-        // Save the updated quiz session
-        quizSession.setUpdatedAt(new Date());
-        quizSession.getQuestionStatuses()
-                        .forEach(e -> logger.info("status of current question: " + e));
         quizSessionRepository.save(quizSession);
 
         int totalQuestions = submission.getAnswers().size();
@@ -104,14 +97,15 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         result.setWrongAnswers(wrongAnswers);
         result.setTotalQuestions(totalQuestions);
         result.setXpGained(xpGained);
+        result.setCoinsGained(coinsGained);
         result.setIqScore(iqScore);
 
-        // Save the quiz result
         quizResultRepository.save(result);
 
-        // Update user XP and score
+        // Update user XP, coins, and score
         User user = userRepository.findById(submission.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         user.setXp(user.getXp() + xpGained);
+        user.setCoins(user.getCoins() + coinsGained);
         user.setScore(user.getScore() + score);
         user.setLeague(leaderboardService.getCurrentLeague(user.getXp()));
         userRepository.save(user);
@@ -122,4 +116,5 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
     private int calculateIqScore(int correctAnswers, int totalQuestions) {
         return (int) (((double) correctAnswers / totalQuestions) * 100);
     }
+
 }

@@ -23,5 +23,6 @@ public class QuizResult {
     private int wrongAnswers;
     private int totalQuestions;
     private int xpGained;
+    private int coinsGained;
     private int iqScore;
 }
