@@ -37,53 +37,6 @@ public class QuestionServiceImpl implements QuestionService {
         questionCollection.setUpdatedAt(new Date());
         return questionRepository.save(questionCollection);
     }
-/*
-    @Override
-    public Map<String, Object> getQuestionsByCategoryAndDifficulty(String userId, String category, String difficulty) {
-        // Fetch all quiz sessions for the user
-        List<QuizSession> quizSessions = quizSessionRepository.findByUserId(userId);
-
-        // Extract answered question IDs from all sessions
-        List<String> answeredQuestionIds = quizSessions.stream()
-                .flatMap(session -> session.getQuestionStatuses().stream())
-                .filter(QuestionStatus::isAnswered) // Filter for answered questions
-                .map(QuestionStatus::getQuestionId) // Extract question IDs
-                .toList();
-
-        // Fetch questions from the db
-        List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
-        List<Question> allQuestions = collections.stream()
-                .flatMap(collection -> collection.getQuestions().stream())
-                .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
-                .filter(question -> !answeredQuestionIds.contains(question.getQuestionId()))
-                .collect(Collectors.toList());
-
-        // Shuffle and limit to 10 questions
-        Collections.shuffle(allQuestions);
-        List<Question> selectedQuestions = allQuestions.stream().limit(10).collect(Collectors.toList());
-
-        // Generate a unique quizId
-        String quizId = UUID.randomUUID().toString();
-
-        // Save the session with the newly selected question IDs
-        List<QuestionStatus> questionStatuses = selectedQuestions.stream()
-                .map(question -> new QuestionStatus(question.getQuestionId(), false)) // Mark new questions as unanswered
-                .toList();
-
-        // Save the session with the newly selected question IDs
-        QuizSession quizSession = new QuizSession();
-        quizSession.setQuizId(quizId);
-        quizSession.setUserId(userId);
-        quizSession.setQuestionStatuses(questionStatuses);
-        quizSessionRepository.save(quizSession);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("quizId", quizId);
-        response.put("questions", selectedQuestions);
-
-        return response;
-    }
-*/
 
     @Override
     public Map<String, Object> getQuestions(String userId, String mode, String category, String difficulty) {
@@ -167,6 +120,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .flatMap(session -> session.getQuestionStatuses().stream())
                 .filter(QuestionStatus::isAnswered)
                 .map(QuestionStatus::getQuestionId)
+                .distinct() // Ensure no duplicates
                 .toList();
     }
 
@@ -214,4 +168,5 @@ public class QuestionServiceImpl implements QuestionService {
         }
         return null;
     }
+
 }
