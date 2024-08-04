@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quizzka.backend.entity.Category;
 import com.quizzka.backend.entity.Question;
 import com.quizzka.backend.entity.QuestionCollection;
+import com.quizzka.backend.repository.QuestionRepository;
 import com.quizzka.backend.service.CategoryService;
 import com.quizzka.backend.service.QuestionFetchingService;
 import com.quizzka.backend.service.QuestionService;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionFetchingServiceImpl implements QuestionFetchingService {
@@ -34,13 +36,15 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private QuestionRepository questionRepository;
 
     @Autowired
     private JavaMailSender mailSender;
 
     private static final Logger logger = LoggerFactory.getLogger(QuestionFetchingServiceImpl.class);
 
-    @Scheduled(cron = "0 */30 * * * ?")// This cron expression runs the job every 30  minutes
+    @Scheduled(cron = "0 */30 * * * ?") // This cron expression runs the job every 30 minutes
     public void fetchQuestionsFromLLM() {
         logger.info("Starting fetchQuestionsFromLLM at {}", new Date());
         List<Category> categories = categoryService.getAllCategories();
@@ -48,18 +52,31 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
         for (Category category : categories) {
             String categoryName = category.getName();
             try {
-                List<Question> questions = fetchQuestionsFromApi(categoryName);
-                for (Question question : questions) {
-                    question.setQuestionId(UUID.randomUUID().toString());
-                }
+                List<Question> newQuestions = fetchQuestionsFromApi(categoryName);
 
-                QuestionCollection questionCollection = new QuestionCollection();
-                questionCollection.setCategory(categoryName);
-                questionCollection.setQuestions(questions);
-                questionCollection.setCreatedAt(new Date());
-                questionCollection.setUpdatedAt(new Date());
-                questionService.saveQuestions(questionCollection);
-                logger.info("Successfully saved questions for category: {}", categoryName);
+                // Fetch existing questions from the database
+                List<QuestionCollection> existingCollections = questionRepository.findByCategory(categoryName);
+                Set<String> existingQuestionsSet = existingCollections.stream()
+                        .flatMap(collection -> collection.getQuestions().stream())
+                        .map(Question::getQuestionText)
+                        .collect(Collectors.toSet());
+
+                // Filter out duplicate questions
+                List<Question> uniqueQuestions = newQuestions.stream()
+                        .filter(question -> !existingQuestionsSet.contains(question.getQuestionText()))
+                        .collect(Collectors.toList());
+
+                if (!uniqueQuestions.isEmpty()) {
+                    QuestionCollection questionCollection = new QuestionCollection();
+                    questionCollection.setCategory(categoryName);
+                    questionCollection.setQuestions(uniqueQuestions);
+                    questionCollection.setCreatedAt(new Date());
+                    questionCollection.setUpdatedAt(new Date());
+                    questionService.saveQuestions(questionCollection);
+                    logger.info("Successfully saved unique questions for category: {}", categoryName);
+                } else {
+                    logger.info("No unique questions found for category: {}", categoryName);
+                }
             } catch (Exception e) {
                 logger.error("Error fetching questions for category: {}", categoryName, e);
                 sendErrorEmail(e, categoryName);
@@ -125,7 +142,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
 
             question.setCorrectOption(questionObject.getString("correctOption"));
             question.setDifficulty(questionObject.getString("difficulty"));
-            question.setTimeLimit(questionObject.getInt("timeLimit"));
+            question.setTimeLimit(10);
 
             questions.add(question);
         }
