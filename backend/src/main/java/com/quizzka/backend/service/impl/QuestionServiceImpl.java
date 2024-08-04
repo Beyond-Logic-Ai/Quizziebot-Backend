@@ -116,21 +116,32 @@ public class QuestionServiceImpl implements QuestionService {
     private List<String> getAnsweredQuestionIds(String userId) {
         List<QuizSession> quizSessions = quizSessionRepository.findByUserId(userId);
 
-        return quizSessions.stream()
+        List<String> answeredQuestionIds = quizSessions.stream()
                 .flatMap(session -> session.getQuestionStatuses().stream())
                 .filter(QuestionStatus::isAnswered)
                 .map(QuestionStatus::getQuestionId)
-                .distinct() // Ensure no duplicates
-                .toList();
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Log the answered question IDs
+        System.out.println("Answered Question IDs for user " + userId + ": " + answeredQuestionIds);
+
+        return answeredQuestionIds;
     }
 
     private List<Question> fetchQuestionsByDifficulty(String difficulty, List<String> answeredQuestionIds) {
         List<QuestionCollection> collections = questionCollectionRepository.findAll();
-        return collections.stream()
+        List<Question> questions = collections.stream()
                 .flatMap(collection -> collection.getQuestions().stream())
                 .filter(question -> question.getDifficulty().equalsIgnoreCase(difficulty))
                 .filter(question -> !answeredQuestionIds.contains(question.getQuestionId()))
                 .collect(Collectors.toList());
+
+        // Log the questions being fetched
+        System.out.println("Fetched " + difficulty + " questions, excluding answered ones: " +
+                questions.stream().map(Question::getQuestionId).collect(Collectors.toList()));
+
+        return questions;
     }
 
     @Override
