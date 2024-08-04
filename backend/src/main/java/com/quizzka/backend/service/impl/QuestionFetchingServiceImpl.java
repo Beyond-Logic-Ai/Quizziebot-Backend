@@ -9,7 +9,11 @@ import com.quizzka.backend.service.QuestionFetchingService;
 import com.quizzka.backend.service.QuestionService;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -30,8 +34,15 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Scheduled(cron = "0 */5 * * * ?") // This cron expression runs the job every hour
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    private static final Logger logger = LoggerFactory.getLogger(QuestionFetchingServiceImpl.class);
+
+    @Scheduled(cron = "0 */30 * * * ?")// This cron expression runs the job every 30  minutes
     public void fetchQuestionsFromLLM() {
+        logger.info("Starting fetchQuestionsFromLLM at {}", new Date());
         List<Category> categories = categoryService.getAllCategories();
 
         for (Category category : categories) {
@@ -48,10 +59,13 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
                 questionCollection.setCreatedAt(new Date());
                 questionCollection.setUpdatedAt(new Date());
                 questionService.saveQuestions(questionCollection);
+                logger.info("Successfully saved questions for category: {}", categoryName);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error fetching questions for category: {}", categoryName, e);
+                sendErrorEmail(e, categoryName);
             }
         }
+        logger.info("Completed fetchQuestionsFromLLM at {}", new Date());
     }
 
     private List<Question> fetchQuestionsFromApi(String category) throws Exception {
@@ -116,5 +130,19 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
             questions.add(question);
         }
         return questions;
+    }
+
+    private void sendErrorEmail(Exception e, String categoryName) {
+        String subject = "Error fetching questions for category: " + categoryName;
+        String body = "An error occurred while fetching questions for category: " + categoryName + "\n\n" +
+                "Error message: " + e.getMessage() + "\n\n" +
+                "Stack trace:\n" + Arrays.toString(e.getStackTrace());
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo("quizzerapp9@gmail.com");
+        message.setSubject(subject);
+        message.setText(body);
+
+        mailSender.send(message);
     }
 }
