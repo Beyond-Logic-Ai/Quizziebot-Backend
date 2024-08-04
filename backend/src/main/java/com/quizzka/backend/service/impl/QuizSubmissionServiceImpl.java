@@ -44,6 +44,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
     @Autowired
     private LeaderboardService leaderboardService;
 
+    @Override
     public QuizResult evaluateQuiz(QuizSubmission submission) {
         int correctAnswers = 0;
         int wrongAnswers = 0;

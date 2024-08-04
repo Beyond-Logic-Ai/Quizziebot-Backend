@@ -44,45 +44,46 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
 
     private static final Logger logger = LoggerFactory.getLogger(QuestionFetchingServiceImpl.class);
 
-    @Scheduled(cron = "0 */30 * * * ?") // This cron expression runs the job every 30 minutes
+    @Scheduled(cron = "0 0/5 * * * ?") // This cron expression runs the job every 30 minutes
     public void fetchQuestionsFromLLM() {
-        logger.info("Starting fetchQuestionsFromLLM at {}", new Date());
+
+        logger.info("Starting the cron job to fetch questions from LLM");
+
         List<Category> categories = categoryService.getAllCategories();
 
         for (Category category : categories) {
             String categoryName = category.getName();
             try {
+                logger.info("Fetching questions for category: {}", categoryName);
                 List<Question> newQuestions = fetchQuestionsFromApi(categoryName);
 
-                // Fetch existing questions from the database
-                List<QuestionCollection> existingCollections = questionRepository.findByCategory(categoryName);
-                Set<String> existingQuestionsSet = existingCollections.stream()
-                        .flatMap(collection -> collection.getQuestions().stream())
-                        .map(Question::getQuestionText)
-                        .collect(Collectors.toSet());
+                // Set unique questionId for each question
+                for (Question question : newQuestions) {
+                    question.setQuestionId(UUID.randomUUID().toString());
+                }
 
-                // Filter out duplicate questions
-                List<Question> uniqueQuestions = newQuestions.stream()
-                        .filter(question -> !existingQuestionsSet.contains(question.getQuestionText()))
-                        .collect(Collectors.toList());
+                // Filter out existing questions
+                List<Question> existingQuestions = questionService.getQuestionsByCategoryAsQuestions(categoryName);
+                List<Question> uniqueQuestions = filterUniqueQuestions(newQuestions, existingQuestions);
 
                 if (!uniqueQuestions.isEmpty()) {
+                    logger.info("Saving {} new unique questions for category: {}", uniqueQuestions.size(), categoryName);
                     QuestionCollection questionCollection = new QuestionCollection();
                     questionCollection.setCategory(categoryName);
                     questionCollection.setQuestions(uniqueQuestions);
                     questionCollection.setCreatedAt(new Date());
                     questionCollection.setUpdatedAt(new Date());
                     questionService.saveQuestions(questionCollection);
-                    logger.info("Successfully saved unique questions for category: {}", categoryName);
                 } else {
-                    logger.info("No unique questions found for category: {}", categoryName);
+                    logger.info("No new unique questions found for category: {}", categoryName);
                 }
             } catch (Exception e) {
                 logger.error("Error fetching questions for category: {}", categoryName, e);
-                sendErrorEmail(e, categoryName);
+                sendErrorEmail(e, categoryName); // Send an email if there's an error
             }
         }
-        logger.info("Completed fetchQuestionsFromLLM at {}", new Date());
+
+        logger.info("Finished the cron job to fetch questions from LLM");
     }
 
     private List<Question> fetchQuestionsFromApi(String category) throws Exception {
@@ -147,6 +148,16 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
             questions.add(question);
         }
         return questions;
+    }
+
+    private List<Question> filterUniqueQuestions(List<Question> newQuestions, List<Question> existingQuestions) {
+        Set<String> existingQuestionTexts = existingQuestions.stream()
+                .map(Question::getQuestionText)
+                .collect(Collectors.toSet());
+
+        return newQuestions.stream()
+                .filter(question -> !existingQuestionTexts.contains(question.getQuestionText()))
+                .collect(Collectors.toList());
     }
 
     private void sendErrorEmail(Exception e, String categoryName) {

@@ -180,5 +180,11 @@ public class QuestionServiceImpl implements QuestionService {
         return null;
     }
 
-
+    @Override
+    public List<Question> getQuestionsByCategoryAsQuestions(String category) {
+        List<QuestionCollection> collections = questionCollectionRepository.findByCategory(category);
+        return collections.stream()
+                .flatMap(collection -> collection.getQuestions().stream())
+                .collect(Collectors.toList());
+    }
 }

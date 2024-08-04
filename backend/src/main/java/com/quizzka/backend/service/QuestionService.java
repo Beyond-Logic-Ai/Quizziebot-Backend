@@ -12,4 +12,5 @@ public interface QuestionService {
     Map<String, Object> getQuestions(String userId, String mode, String category, String difficulty);
     Question findQuestionById(String questionId);
     Map<String, Object> getQuestionsByCategoryAndDifficulty(String category, String difficulty);
+    List<Question> getQuestionsByCategoryAsQuestions(String category);
 }
