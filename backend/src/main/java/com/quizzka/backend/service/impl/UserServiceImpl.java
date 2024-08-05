@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -41,6 +42,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> findById(String userId) {
+        return userRepository.findById(userId);
+    }
+
+    @Override
     public void updateLastLoginTime(String identifier) {
         User user = userRepository.findByEmail(identifier)
                 .orElseGet(() -> userRepository.findByPhoneNumber(identifier)
@@ -50,5 +56,8 @@ public class UserServiceImpl implements UserService {
         user.setLastLogin(new Date());
         userRepository.save(user);
     }
-
+    @Override
+    public List<User> findAllByOrderByXpDescScoreDesc() {
+        return userRepository.findAllByOrderByXpDescScoreDesc();
+    }
 }

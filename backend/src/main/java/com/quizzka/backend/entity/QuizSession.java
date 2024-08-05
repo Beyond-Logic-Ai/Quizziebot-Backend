@@ -22,6 +22,9 @@ public class QuizSession {
     private String userId;
     private List<QuestionStatus> questionStatuses;
     private String mode;
+    private int xpGained;
+    private int coinsGained;
+    private int scoreGained;
     private Date createdAt;
     private Date updatedAt;
 }

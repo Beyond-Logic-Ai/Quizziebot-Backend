@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,4 +27,6 @@ public class QuizResult {
     private int xpGained;
     private int coinsGained;
     private int iqScore;
+    private long totalTimeSpent;
+    private Date createdAt;
 }
