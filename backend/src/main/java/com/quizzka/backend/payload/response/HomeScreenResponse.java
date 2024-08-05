@@ -16,5 +16,6 @@ public class HomeScreenResponse {
     private String profilePictureUrl;
     private int xp;
     private int coins;
+    private String country;
     private Date lastLogin;
 }

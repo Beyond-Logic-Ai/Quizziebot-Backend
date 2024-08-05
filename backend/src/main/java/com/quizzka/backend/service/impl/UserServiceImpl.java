@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
         response.setProfilePictureUrl(user.getProfilePictureUrl());
         response.setXp(user.getXp());
         response.setCoins(user.getCoins());
+        response.setCountry(user.getCountry());
         response.setLastLogin(user.getLastLogin());
 
         return response;
