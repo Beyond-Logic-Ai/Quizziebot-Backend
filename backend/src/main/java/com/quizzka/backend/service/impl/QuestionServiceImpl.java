@@ -1,12 +1,11 @@
 package com.quizzka.backend.service.impl;
 
-import com.quizzka.backend.entity.Question;
-import com.quizzka.backend.entity.QuestionCollection;
-import com.quizzka.backend.entity.QuizSession;
+import com.quizzka.backend.entity.*;
 import com.quizzka.backend.entity.helper.QuestionStatus;
-import com.quizzka.backend.repository.QuestionCollectionRepository;
-import com.quizzka.backend.repository.QuestionRepository;
-import com.quizzka.backend.repository.QuizSessionRepository;
+import com.quizzka.backend.payload.response.QuizGenerationResponse;
+import com.quizzka.backend.payload.response.TopicBriefResponse;
+import com.quizzka.backend.repository.*;
+import com.quizzka.backend.service.AIService;
 import com.quizzka.backend.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
     private QuizSessionRepository quizSessionRepository;
+
+    @Autowired
+    private AIService aiService;
+
+    @Autowired
+    private CustomQuizSessionRepository customQuizSessionRepository;
+
+    @Autowired
+    private CustomQuizCollectionRepository customQuizCollectionRepository;
 
     @Override
     public List<QuestionCollection> getQuestionsByCategory(String category) {
@@ -187,5 +195,47 @@ public class QuestionServiceImpl implements QuestionService {
         return collections.stream()
                 .flatMap(collection -> collection.getQuestions().stream())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TopicBriefResponse getBrief(String topic) throws Exception {
+        String brief = aiService.fetchBriefFromAI(topic);
+        return new TopicBriefResponse(brief);
+    }
+
+    public QuizGenerationResponse generateQuiz(String topic, String userId) throws Exception {
+        List<Question> questions = aiService.fetchQuestionsFromAI(topic);
+        for (Question question : questions) {
+            question.setQuestionId(UUID.randomUUID().toString());
+        }
+
+        CustomQuizCollection customQuizCollection = new CustomQuizCollection();
+        customQuizCollection.setId(UUID.randomUUID().toString());
+        customQuizCollection.setCategory(topic);
+        customQuizCollection.setQuestions(questions);
+        customQuizCollection.setCreatedAt(new Date());
+        customQuizCollection.setUpdatedAt(new Date());
+
+        customQuizCollectionRepository.save(customQuizCollection);
+
+        // Generate a unique quizId
+        String quizId = UUID.randomUUID().toString();
+
+        // Save the session with the newly selected question IDs
+        List<QuestionStatus> questionStatuses = questions.stream()
+                .map(question -> new QuestionStatus(question.getQuestionId(), false)) // Mark new questions as unanswered
+                .collect(Collectors.toList());
+
+        CustomQuizSession customQuizSession = new CustomQuizSession();
+        customQuizSession.setQuizId(quizId);
+        customQuizSession.setUserId(userId);
+        customQuizSession.setQuestionStatuses(questionStatuses);
+        customQuizSession.setMode("custom");
+        customQuizSession.setCreatedAt(new Date());
+        customQuizSession.setUpdatedAt(new Date());
+
+        customQuizSessionRepository.save(customQuizSession);
+
+        return new QuizGenerationResponse(quizId, questions);
     }
 }

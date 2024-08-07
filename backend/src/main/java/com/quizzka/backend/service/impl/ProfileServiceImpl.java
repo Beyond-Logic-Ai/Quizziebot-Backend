@@ -56,6 +56,9 @@ public class ProfileServiceImpl implements ProfileService {
         response.setClassicGamesPlayed(userPlayStats.getClassicPlays());
         response.setTotalPlays(userPlayStats.getClassicPlays() + userPlayStats.getArcadePlays());
         response.setTotalTimeSpent(userPlayStats.getTotalTimeSpent());
+        response.setTotalXp(user.getXp());
+        response.setCoins(user.getCoins());
+        response.setOverallIq(userPlayStats.getOverallIq());
 
         // Fetch and set rank
         LeaderboardEntry rankEntry = getUserRank(userId);
