@@ -112,7 +112,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         result.setXpGained(xpGained);
         result.setCoinsGained(coinsGained);
         result.setIqScore(iqScore);
-//        result.setCreatedAt(new Date());
+        result.setCreatedAt(new Date());
         result.setTotalTimeSpent(totalTimeTaken);
 
         quizResultRepository.save(result);
@@ -189,6 +189,9 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
     }
 
     private boolean isSameDay(Date date1, Date date2) {
+
+        if (date2 == null) return true; // if user hasn't played one quiz yet
+
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);

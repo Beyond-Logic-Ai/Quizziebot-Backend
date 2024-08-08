@@ -70,7 +70,7 @@ public class ProfileServiceImpl implements ProfileService {
         List<ProfileResponse.IQDataPoint> iqGraph = quizResults.stream()
                 .map(result -> {
                     ProfileResponse.IQDataPoint point = new ProfileResponse.IQDataPoint();
-//                    point.setDate(result.getCreatedAt().toString());
+                    point.setDate(result.getCreatedAt().toString());
                     point.setIq(result.getIqScore());
                     return point;
                 })
