@@ -19,6 +19,12 @@ public class UserPlayStatsServiceImpl implements UserPlayStatsService {
         return userPlayStatsRepository.findByUserId(userId);
     }
 
+    @Override
+    public void save(UserPlayStats userPlayStats) {
+        userPlayStatsRepository.save(userPlayStats);
+    }
+
+    @Override
     public UserPlayStats getOrCreateUserPlayStats(String userId, String username) {
         return userPlayStatsRepository.findByUserId(userId).orElseGet(() -> {
             UserPlayStats newUserPlayStats = new UserPlayStats();

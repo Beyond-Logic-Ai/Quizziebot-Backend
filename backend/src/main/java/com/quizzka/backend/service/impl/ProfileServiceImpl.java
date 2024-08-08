@@ -138,6 +138,11 @@ public class ProfileServiceImpl implements ProfileService {
 
         User updatedUser = userRepository.save(user);
 
+        // Update username in UserPlayStats
+        if (isUsernameUpdated) {
+            updateUserPlayStatsUsername(user.getId(), updatedUser.getUsername());
+        }
+
         String newJwtToken = null;
         if (isUsernameUpdated) {
             newJwtToken = jwtUtil.generateToken(updatedUser);
@@ -151,5 +156,12 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedUser.getDob().toLocalDate(),
                 newJwtToken // include new token if username was updated
         );
+    }
+
+    private void updateUserPlayStatsUsername(String userId, String newUsername) {
+        UserPlayStats userPlayStats = userPlayStatsService.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User play stats not found"));
+        userPlayStats.setUserName(newUsername);
+        userPlayStatsService.save(userPlayStats);
     }
 }
