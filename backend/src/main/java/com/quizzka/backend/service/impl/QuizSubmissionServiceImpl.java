@@ -112,7 +112,7 @@ public class QuizSubmissionServiceImpl implements QuizSubmissionService {
         result.setXpGained(xpGained);
         result.setCoinsGained(coinsGained);
         result.setIqScore(iqScore);
-        result.setCreatedAt(new Date());
+//        result.setCreatedAt(new Date());
         result.setTotalTimeSpent(totalTimeTaken);
 
         quizResultRepository.save(result);
