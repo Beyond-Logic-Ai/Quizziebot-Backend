@@ -42,8 +42,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         User user = userOptional.get();
-        UserPlayStats userPlayStats = userPlayStatsService.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User play stats not found"));
+        UserPlayStats userPlayStats = userPlayStatsService.getOrCreateUserPlayStats(userId, user.getUsername());
 
         List<QuizResult> quizResults = quizResultService.findByUserId(userId);
 

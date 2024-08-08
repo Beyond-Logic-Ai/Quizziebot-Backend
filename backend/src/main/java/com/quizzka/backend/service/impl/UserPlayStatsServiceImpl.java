@@ -18,4 +18,21 @@ public class UserPlayStatsServiceImpl implements UserPlayStatsService {
     public Optional<UserPlayStats> findByUserId(String userId) {
         return userPlayStatsRepository.findByUserId(userId);
     }
+
+    public UserPlayStats getOrCreateUserPlayStats(String userId, String username) {
+        return userPlayStatsRepository.findByUserId(userId).orElseGet(() -> {
+            UserPlayStats newUserPlayStats = new UserPlayStats();
+            newUserPlayStats.setUserId(userId);
+            newUserPlayStats.setUserName(username);
+            newUserPlayStats.setClassicPlays(0);
+            newUserPlayStats.setArcadePlays(0);
+            newUserPlayStats.setTotalTimeSpent(0);
+            newUserPlayStats.setOverallIq(0);
+            newUserPlayStats.setStreak(0);
+            newUserPlayStats.setTopPositions(0);
+            newUserPlayStats.setChallengePassed(0);
+            newUserPlayStats.setFastestRecord(0);
+            return userPlayStatsRepository.save(newUserPlayStats);
+        });
+    }
 }
