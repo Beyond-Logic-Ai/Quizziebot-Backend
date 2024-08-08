@@ -28,5 +28,5 @@ public class QuizResult {
     private int coinsGained;
     private int iqScore;
     private long totalTimeSpent;
-//    private Date createdAt;
+    private Date createdAt;
 }
