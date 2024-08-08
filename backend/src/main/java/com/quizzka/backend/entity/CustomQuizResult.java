@@ -15,7 +15,6 @@ public class CustomQuizResult {
     private String id;
     private String userId;
     private String quizId;
-    private List<Answer> answers;
     private int correctAnswers;
     private int wrongAnswers;
     private long totalTimeTaken; // in seconds

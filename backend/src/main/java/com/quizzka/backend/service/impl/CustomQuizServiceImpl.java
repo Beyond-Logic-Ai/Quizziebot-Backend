@@ -1,10 +1,9 @@
 package com.quizzka.backend.service.impl;
 
-import com.quizzka.backend.entity.CustomQuizResult;
-import com.quizzka.backend.entity.CustomQuizSession;
-import com.quizzka.backend.entity.Question;
+import com.quizzka.backend.entity.*;
 import com.quizzka.backend.payload.request.CustomQuizSubmissionRequest;
 import com.quizzka.backend.payload.request.helper.Answer;
+import com.quizzka.backend.repository.CustomQuizCollectionRepository;
 import com.quizzka.backend.repository.CustomQuizResultRepository;
 import com.quizzka.backend.repository.CustomQuizSessionRepository;
 import com.quizzka.backend.repository.UserRepository;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,6 +34,9 @@ public class CustomQuizServiceImpl implements CustomQuizService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CustomQuizCollectionRepository customQuizCollectionRepository;
+
     @Override
     public CustomQuizResult saveCustomQuiz(CustomQuizSubmissionRequest submissionRequest) {
         int correctAnswers = 0;
@@ -45,7 +48,7 @@ public class CustomQuizServiceImpl implements CustomQuizService {
                 .orElseThrow(() -> new RuntimeException("Quiz session not found"));
 
         Map<String, Question> questionMap = submissionRequest.getAnswers().stream()
-                .map(answer -> questionService.findQuestionById(answer.getQuestionId()))
+                .map(answer -> findQuestionById(answer.getQuestionId()))
                 .collect(Collectors.toMap(Question::getQuestionId, Function.identity()));
 
         for (Answer answer : submissionRequest.getAnswers()) {
@@ -68,7 +71,6 @@ public class CustomQuizServiceImpl implements CustomQuizService {
         CustomQuizResult result = new CustomQuizResult();
         result.setUserId(submissionRequest.getUserId());
         result.setQuizId(submissionRequest.getQuizId());
-        result.setAnswers(submissionRequest.getAnswers());
         result.setCorrectAnswers(correctAnswers);
         result.setWrongAnswers(wrongAnswers);
         result.setTotalTimeTaken(totalTimeTaken);
@@ -77,5 +79,17 @@ public class CustomQuizServiceImpl implements CustomQuizService {
         customQuizResultRepository.save(result);
 
         return result;
+    }
+
+    public Question findQuestionById(String questionId) {
+        List<CustomQuizCollection> collections = customQuizCollectionRepository.findAll();
+        for (CustomQuizCollection collection : collections) {
+            for (Question question : collection.getQuestions()) {
+                if (question.getQuestionId().equals(questionId)) {
+                    return question;
+                }
+            }
+        }
+        return null;
     }
 }
