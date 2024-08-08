@@ -15,4 +15,5 @@ public class UserProfileResponse {
     private String lastname;
     private String email;
     private LocalDate dob;
+    private String newJwtToken;
 }

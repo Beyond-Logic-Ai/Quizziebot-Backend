@@ -3,6 +3,7 @@ package com.quizzka.backend.service.impl;
 import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.User;
 import com.quizzka.backend.entity.UserPlayStats;
+import com.quizzka.backend.jwt.JwtUtil;
 import com.quizzka.backend.payload.request.ProfileUpdateRequest;
 import com.quizzka.backend.payload.response.LeaderboardEntry;
 import com.quizzka.backend.payload.response.ProfileResponse;
@@ -33,6 +34,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public ProfileResponse getUserProfile(String userId) {
@@ -114,14 +118,18 @@ public class ProfileServiceImpl implements ProfileService {
         User user = userRepository.findById(profileUpdateRequest.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        profileUpdateRequest.getUsername().ifPresent(username -> {
-            if (!user.getUsername().equals(username)) {
-                if (userRepository.existsByUsername(username)) {
+        boolean isUsernameUpdated = false;
+
+        if (profileUpdateRequest.getUsername().isPresent()) {
+            String newUsername = profileUpdateRequest.getUsername().get();
+            if (!user.getUsername().equals(newUsername)) {
+                if (userRepository.existsByUsername(newUsername)) {
                     throw new RuntimeException("Username is already in use");
                 }
-                user.setUsername(username);
+                user.setUsername(newUsername);
+                isUsernameUpdated = true;
             }
-        });
+        }
 
         profileUpdateRequest.getFirstname().ifPresent(user::setFirstname);
         profileUpdateRequest.getLastname().ifPresent(user::setLastname);
@@ -130,12 +138,18 @@ public class ProfileServiceImpl implements ProfileService {
 
         User updatedUser = userRepository.save(user);
 
+        String newJwtToken = null;
+        if (isUsernameUpdated) {
+            newJwtToken = jwtUtil.generateToken(updatedUser);
+        }
+
         return new UserProfileResponse(
                 updatedUser.getUsername(),
                 updatedUser.getFirstname(),
                 updatedUser.getLastname(),
                 updatedUser.getEmail(),
-                updatedUser.getDob().toLocalDate()
+                updatedUser.getDob().toLocalDate(),
+                newJwtToken // include new token if username was updated
         );
     }
 }
