@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
         response.setCoins(user.getCoins());
         response.setCountry(user.getCountry());
         response.setLastLogin(user.getLastLogin());
+        response.setLeague(user.getLeague());
 
         return response;
     }

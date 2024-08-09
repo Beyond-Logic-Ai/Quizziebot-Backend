@@ -18,4 +18,5 @@ public class HomeScreenResponse {
     private int coins;
     private String country;
     private Date lastLogin;
+    private String league;
 }
