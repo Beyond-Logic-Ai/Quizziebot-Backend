@@ -1,6 +1,7 @@
 package com.quizzka.backend.jwt;
 
 import com.quizzka.backend.entity.User;
+import com.quizzka.backend.security.CustomOAuth2User;
 import com.quizzka.backend.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,8 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", userDetails.getUsername());
 
-        if (userDetails instanceof CustomUserDetails) {
-            claims.put("email", ((CustomUserDetails) userDetails).getEmail());
+        if (userDetails instanceof CustomOAuth2User) {
+            claims.put("email", ((CustomOAuth2User) userDetails).getEmail());
         }
 
         return Jwts.builder()

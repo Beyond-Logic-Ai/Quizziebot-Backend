@@ -1,5 +1,7 @@
 package com.quizzka.backend.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.quizzka.backend.entity.User;
 import com.quizzka.backend.payload.request.ForgotPasswordRequest;
 import com.quizzka.backend.payload.request.LoginRequest;
 import com.quizzka.backend.payload.request.ResetPasswordRequest;
@@ -16,4 +18,5 @@ public interface AuthService {
     boolean checkUsername(String username);
     boolean checkEmail(String email);
     boolean checkPhoneNumber(String phoneNumber);
+    User findOrCreateUser(String email, GoogleIdToken.Payload payload);
 }

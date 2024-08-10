@@ -1,5 +1,6 @@
 package com.quizzka.backend.service.impl;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.quizzka.backend.entity.QuizResult;
 import com.quizzka.backend.entity.User;
 import com.quizzka.backend.jwt.JwtUtil;
@@ -30,14 +31,6 @@ import java.util.function.Predicate;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -59,6 +52,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserService userService;
+
+    private AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
 
     @Override
     public SignUpRequest registerUser(SignUpRequest signUpRequest) {
@@ -178,4 +186,20 @@ public class AuthServiceImpl implements AuthService {
         return userRepository.existsByPhoneNumber(phoneNumber);
     }
 
+    @Override
+    public User findOrCreateUser(String email, GoogleIdToken.Payload payload) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .email(email)
+                    .firstname((String) payload.get("given_name"))
+                    .lastname((String) payload.get("family_name"))
+                    .username(email)
+                    .password(passwordEncoder.encode("oauth2user"))
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
+                    .loginType("GOOGLE")
+                    .build();
+            return userRepository.save(newUser);
+        });
+    }
 }
