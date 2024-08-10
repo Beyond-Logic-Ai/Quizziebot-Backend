@@ -44,7 +44,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
                     "  }" +
                     "]";
             String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
-            String url = "http://localhost:8080/prompt?prompt=" + encodedPrompt + "&geminiKey=AIzaSyBlGN-vrFH1a6dc3Kt6eTrRKjr6JxeBZXI";
+            String url = "http://localhost:8080/prompt?prompt=" + encodedPrompt + "&geminiKey=AIzaSyCYREbJk-Z8qxX-A6ZnokVNcB8wmCy3Nxs";
             String response = restTemplate.getForObject(url, String.class);
 
             // Extracting the text from the JSON response
