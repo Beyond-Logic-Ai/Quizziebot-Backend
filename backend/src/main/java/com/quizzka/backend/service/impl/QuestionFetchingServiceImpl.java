@@ -97,7 +97,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
                 "Please provide exactly 3 easy questions, 4 medium questions, and 3 hard questions in the JSON output with the specified structure.";
 
         String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
-        String url = "http://localhost:8080/prompt?prompt=" + encodedPrompt + "&geminiKey=AIzaSyCYREbJk-Z8qxX-A6ZnokVNcB8wmCy3Nxs";
+        String url = "http://localhost:8080/prompt?prompt=" + encodedPrompt + "&geminiKey=AIzaSyBKPybSyqXhIHUsnR8RCpOXhYupuBREM3w";
         String response = restTemplate.getForObject(url, String.class);
 
         // Extract the "text" field from the JSON response
