@@ -24,7 +24,7 @@ public class ScheduledTasks {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    @Scheduled(cron = "0 0/5 * * * ?") // Runs every day at midnight
+    @Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnight
     public void checkRanksAndStreaks() {
         logger.info("Scheduled task checkRanksAndStreaks started");
         notificationService.checkRanksAndStreaks();
