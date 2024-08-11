@@ -44,7 +44,7 @@ public class QuestionFetchingServiceImpl implements QuestionFetchingService {
 
     private static final Logger logger = LoggerFactory.getLogger(QuestionFetchingServiceImpl.class);
 
-    @Scheduled(cron = "0 0/5 * * * ?") // This cron expression runs the job every 5 minutes
+    @Scheduled(cron = "0 0/30 * * * ?") // This cron expression runs the job every 5 minutes
     public void fetchQuestionsFromLLM() {
 
         logger.info("Starting the cron job to fetch questions from LLM");

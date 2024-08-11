@@ -8,10 +8,7 @@ import com.quizzka.backend.payload.request.*;
 import com.quizzka.backend.payload.response.JwtResponse;
 import com.quizzka.backend.repository.QuizResultRepository;
 import com.quizzka.backend.repository.UserRepository;
-import com.quizzka.backend.service.AuthService;
-import com.quizzka.backend.service.EmailService;
-import com.quizzka.backend.service.QuizSubmissionService;
-import com.quizzka.backend.service.UserService;
+import com.quizzka.backend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -105,7 +102,6 @@ public class AuthServiceImpl implements AuthService {
 //        quizSubmission.setInitialQuiz(true);
 //        QuizResult quizResult = quizSubmissionService.evaluateQuiz(quizSubmission);
         signUpRequest.setId(user.getId());
-
         return signUpRequest;
     }
 

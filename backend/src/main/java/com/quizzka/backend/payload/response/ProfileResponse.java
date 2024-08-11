@@ -20,6 +20,7 @@ public class ProfileResponse {
     private int totalPlays;
     private long totalTimeSpent;
     private double rank;
+    private String league;
     private int totalXp;
     private int coins;
     private double overallIq;

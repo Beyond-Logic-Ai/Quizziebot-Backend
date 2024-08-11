@@ -9,4 +9,5 @@ public interface LeaderboardService {
     List<LeaderboardEntry> getCountryLeaderboard(String country);
     LeaderboardEntry getUserRank(String userId);
     String getCurrentLeague(int xp);
+    LeaderboardEntry getPreviousRank(String userId);
 }

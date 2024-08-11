@@ -9,10 +9,7 @@ import com.quizzka.backend.payload.response.LeaderboardEntry;
 import com.quizzka.backend.payload.response.ProfileResponse;
 import com.quizzka.backend.payload.response.UserProfileResponse;
 import com.quizzka.backend.repository.UserRepository;
-import com.quizzka.backend.service.ProfileService;
-import com.quizzka.backend.service.QuizResultService;
-import com.quizzka.backend.service.UserPlayStatsService;
-import com.quizzka.backend.service.UserService;
+import com.quizzka.backend.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +34,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private LeaderboardService leaderboardService;
 
     @Override
     public ProfileResponse getUserProfile(String userId) {
@@ -66,6 +66,7 @@ public class ProfileServiceImpl implements ProfileService {
         // Fetch and set rank
         LeaderboardEntry rankEntry = getUserRank(userId);
         response.setRank(rankEntry.getRank());
+        response.setLeague(leaderboardService.getCurrentLeague(user.getXp()));
 
         List<ProfileResponse.IQDataPoint> iqGraph = quizResults.stream()
                 .map(result -> {

@@ -113,6 +113,12 @@ public class User implements UserDetails {
     @Getter @Setter
     private int coins;
 
+    @Getter @Setter
+    private String fcmToken;
+
+    @Getter @Setter
+    private int previousRank;
+
     public String getFullName() {
         return firstname + " " + lastname;
     }
