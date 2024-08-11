@@ -91,6 +91,7 @@ public class AuthServiceImpl implements AuthService {
                 .country(signUpRequest.getCountry())
                 .loginType(signUpRequest.getLoginType())
                 .rememberMe(signUpRequest.isRememberMe())
+                .fcmToken(signUpRequest.getFcmToken())
                 .createdAt(new Date())
                 .updatedAt(new Date())
                 .build();
