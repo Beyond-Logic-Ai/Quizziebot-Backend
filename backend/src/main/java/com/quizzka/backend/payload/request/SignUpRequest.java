@@ -57,4 +57,6 @@ public class SignUpRequest {
     private boolean rememberMe;
 
     private String loginType;
+
+    private String fcmToken;
 }
