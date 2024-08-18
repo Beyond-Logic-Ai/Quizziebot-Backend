@@ -45,11 +45,9 @@ public class User implements UserDetails {
     @Getter @Setter
     private String phoneNumber;
 
-    @NotBlank(message = "First name is mandatory")
     @Getter @Setter
     private String firstname;
 
-    @NotBlank(message = "Last name is mandatory")
     @Getter @Setter
     private String lastname;
 
@@ -58,7 +56,6 @@ public class User implements UserDetails {
     @Setter
     private String username;
 
-    @NotBlank(message = "Gender is mandatory")
     @Getter @Setter
     private String gender;
 
@@ -66,7 +63,6 @@ public class User implements UserDetails {
     @Getter @Setter
     private LocalDateTime dob;
 
-    @NotBlank(message = "Account type is mandatory")
     @Getter @Setter
     private String accountType;
 

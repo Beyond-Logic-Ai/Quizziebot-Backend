@@ -31,22 +31,18 @@ public class SignUpRequest {
 
     private String phoneNumber;
 
-    @NotBlank(message = "First name is mandatory")
     private String firstname;
 
-    @NotBlank(message = "Last name is mandatory")
     private String lastname;
 
     @NotBlank(message = "Username is mandatory")
     private String username;
 
-    @NotBlank(message = "Gender is mandatory")
     private String gender;
 
     @NotNull(message = "Date of birth is mandatory")
     private LocalDateTime dob;
 
-    @NotBlank(message = "Account type is mandatory")
     private String accountType;
 
     private int age;
