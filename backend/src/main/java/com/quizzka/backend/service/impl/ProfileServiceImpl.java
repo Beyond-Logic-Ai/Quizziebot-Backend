@@ -12,7 +12,14 @@ import com.quizzka.backend.repository.UserRepository;
 import com.quizzka.backend.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +44,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private LeaderboardService leaderboardService;
+
+    @Autowired
+    private S3Client s3Client;
 
     @Override
     public ProfileResponse getUserProfile(String userId) {
@@ -137,6 +147,25 @@ public class ProfileServiceImpl implements ProfileService {
         profileUpdateRequest.getEmail().ifPresent(user::setEmail);
         profileUpdateRequest.getDob().ifPresent(dob -> user.setDob(dob.atStartOfDay()));
 
+        // Handle profile picture upload
+        if (profileUpdateRequest.getProfilePicture().isPresent()) {
+            MultipartFile file = profileUpdateRequest.getProfilePicture().get();
+            String key = "profiles/" + user.getId() + "_" + file.getOriginalFilename();
+
+            try {
+                s3Client.putObject(PutObjectRequest.builder()
+                                .bucket("profilesquizee")
+                                .key(key)
+                                .contentType(file.getContentType())
+                                .build(),
+                        software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+                String profilePictureUrl = "https://profilesquizee.s3.us-east-1.amazonaws.com/" + key;
+                user.setProfilePictureUrl(profilePictureUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Error uploading profile picture", e);
+            }
+        }
+
         User updatedUser = userRepository.save(user);
 
         // Update username in UserPlayStats
@@ -155,9 +184,11 @@ public class ProfileServiceImpl implements ProfileService {
                 updatedUser.getLastname(),
                 updatedUser.getEmail(),
                 updatedUser.getDob().toLocalDate(),
-                newJwtToken // include new token if username was updated
+                newJwtToken,
+                updatedUser.getProfilePictureUrl() // Return the profile picture URL
         );
     }
+
 
     private void updateUserPlayStatsUsername(String userId, String newUsername) {
         UserPlayStats userPlayStats = userPlayStatsService.findByUserId(userId)

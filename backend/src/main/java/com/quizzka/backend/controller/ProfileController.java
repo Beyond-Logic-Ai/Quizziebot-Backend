@@ -27,7 +27,8 @@ public class ProfileController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<UserProfileResponse> updateProfile(@RequestBody ProfileUpdateRequest profileUpdateRequest) {
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @ModelAttribute ProfileUpdateRequest profileUpdateRequest) {
         UserProfileResponse updatedProfile = profileService.updateProfile(profileUpdateRequest);
         return ResponseEntity.ok(updatedProfile);
     }

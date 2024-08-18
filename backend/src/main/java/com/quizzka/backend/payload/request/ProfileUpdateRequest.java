@@ -1,6 +1,7 @@
 package com.quizzka.backend.payload.request;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -13,4 +14,5 @@ public class ProfileUpdateRequest {
     private Optional<String> lastname = Optional.empty();
     private Optional<String> email = Optional.empty();
     private Optional<LocalDate> dob = Optional.empty();
+    private Optional<MultipartFile> profilePicture = Optional.empty();
 }
